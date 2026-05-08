@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mapa — Há Combustível</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#map {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #0f1115;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* PANEL */
+
+.panel {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 1000;
+  width: 410px;
+  max-width: calc(100vw - 36px);
+  background: rgba(17, 24, 39, .94);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 26px;
+  padding: 18px;
+  backdrop-filter: blur(18px);
+  box-shadow:
+    0 20px 70px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.panel-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.back-btn {
+  text-decoration: none;
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.10);
+  padding: 9px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* CONTROLS */
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.controls select,
+.controls button {
+  width: 100%;
+}
+
+select,
+button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+select {
+  background: #fff;
+  color: #111827;
+}
+
+button {
+  background: rgba(255,255,255,.09);
+  color: #e5e7eb;
+}
+
+button.active {
+  background: #fff;
+  color: #111827;
+}
+
+.gps-btn {
+  background: #185fa5;
+  color: #fff;
+}
+
+.refresh-btn {
+  background: rgba(45,122,58,.22);
+  color: #d1fae5;
+}
+
+/* STATS */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.stat {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 12px;
+  text-align: center;
+}
+
+.stat strong {
+  display: block;
+  font-size: 22px;
+  margin-bottom: 2px;
+}
+
+.stat span {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.meta {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+/* LEGEND */
+
+.legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+/* MARKERS */
+
+.marker {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.35),
+    0 0 0 6px rgba(255,255,255,.14);
+}
+
+.user-marker {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #185fa5;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 10px rgba(24,95,165,.20);
+}
+
+/* POPUP */
+
+.leaflet-popup-content-wrapper {
+  border-radius: 22px;
+  padding: 4px;
+}
+
+.leaflet-popup-content {
+  margin: 12px;
+}
+
+.leaflet-popup-tip {
+  background: #fff;
+}
+
+/* FAB */
+
+.fab-reportar {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 1200;
+  background: #1a1a18;
+  color: #f5f5f0;
+  padding: 15px 28px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 10px 28px rgba(0,0,0,.35);
+}
+
+.fab-reportar:hover {
+  background: #333;
+}
+
+/* MOBILE */
+
+@media (max-width: 640px) {
+  .panel {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: none;
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  .panel-top {
+    margin-bottom: 12px;
+  }
+
+  .title {
+    font-size: 17px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+  }
+
+  .back-btn {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .controls {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 3px;
+    margin-bottom: 12px;
+  }
+
+  .controls select,
+  .controls button {
+    width: auto;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 9px 11px;
+    font-size: 11px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .stat {
+    padding: 9px 6px;
+    border-radius: 14px;
+  }
+
+  .stat strong {
+    font-size: 18px;
+  }
+
+  .stat span {
+    font-size: 10px;
+  }
+
+  .legend {
+    display: none;
+  }
+
+  .fab-reportar {
+    bottom: 18px;
+    padding: 14px 24px;
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 900px) {
+  .controls {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="panel">
+  <div class="panel-top">
+    <div>
+      <div class="title">🗺️ Mapa interactivo</div>
+      <div class="subtitle">Disponibilidade de combustível em tempo real</div>
+    </div>
+
+    <a class="back-btn" href="index.html">← Voltar</a>
+  </div>
+
+  <div class="controls">
+    <select id="city">
+      <option value="maputo">Maputo</option>
+      <option value="beira">Beira</option>
+    </select>
+
+    <button class="active" data-filter="todos">Todos</button>
+    <button data-filter="verde">Disponível</button>
+    <button data-filter="amarelo">Com fila</button>
+    <button data-filter="vermelho">Esgotado</button>
+
+    <button id="gpsBtn" class="gps-btn">📍 GPS</button>
+    <button id="refreshBtn" class="refresh-btn">↻ Refrescar</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <strong id="statVerde">0</strong>
+      <span>disponível</span>
+    </div>
+
+    <div class="stat">
+      <strong id="statAmarelo">0</strong>
+      <span>com fila</span>
+    </div>
+
+    <div class="stat">
+      <strong id="statVermelho">0</strong>
+      <span>esgotado</span>
+    </div>
+  </div>
+
+  <div class="meta" id="meta">A carregar dados...</div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <span class="dot" style="background:#2d7a3a"></span>
+      Disponível
+    </div>
+
+    <div class="legend-item">
+      <span class="dot" style="background:#b07d00"></span>
+      Com fila
+    </div>
+
+    <div class="legend-item">
+      <span class="dot" style="background:#c0392b"></span>
+      Esgotado
+    </div>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<a
+  class="fab-reportar"
+  href="https://docs.google.com/forms/d/e/1FAIpQLSfv-UJyaqEVK3CF_c9yQaq1iE6Lr4dHmJhd0nU9DGRYhLxcCQ/viewform"
+  target="_blank"
+>
+  + Reportar uma bomba
+</a>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const CENTERS = {
+  maputo: [-25.9653, 32.5892],
+  beira: [-19.8332, 34.8424]
+};
+
+let city = "maputo";
+let filter = "todos";
+let userPosition = null;
+
+const MANUAL_POINTS = [
+  { bairro:"Aeroporto", name:"GALP", fuel:"Gas+Diesel", obs:"Fila gigantesca", status:"Com fila", time:"há 37 min", reports:"1 report", coords:[-25.9198,32.5727] },
+  { bairro:"Aeroporto", name:"ENGEN", fuel:"Gasolina", obs:"", status:"Disponível", time:"há 1h 1min · pode estar desatualizado", reports:"1 report", coords:[-25.9347,32.5721] },
+
+  { bairro:"Agostinho Neto/Memu", name:"Karan", fuel:"Gasolina", obs:"Outro(a) - especificado nas referências de bomba", status:"Com fila", time:"há 2h 54min · pode estar desatualizado", reports:"1 report", coords:[-25.9478,32.6102] },
+
+  { bairro:"Albazine", name:"Petromoc", fuel:"Gasóleo", obs:"Piquenique", status:"Com fila", time:"há 1h 38min · pode estar desatualizado", reports:"1 report", coords:[-25.8771,32.5068] },
+
+  { bairro:"Alto Maé", name:"GALP", fuel:"Gasolina", obs:"São contra lei", status:"Disponível", time:"há 5 min", reports:"1 report", coords:[-25.9589,32.5837] },
+  { bairro:"Alto Maé", name:"TOTAL", fuel:"Gasóleo", obs:"Próximo ao Cenáculo Maior", status:"Disponível", time:"há 30 min", reports:"1 report", coords:[-25.9607,32.5821] },
+  { bairro:"Alto Maé", name:"Petromoc", fuel:"Gasóleo", obs:"Tem Diesel sem fila", status:"Disponível", time:"há 31 min", reports:"1 report", coords:[-25.9615,32.5808] },
+
+  { bairro:"Central", name:"GALP", fuel:"Gas+Diesel", obs:"TPM", status:"Com fila", time:"há 1h 29min · pode estar desatualizado", reports:"1 report", coords:[-25.9658,32.5831] },
+
+  { bairro:"Chiango", name:"SASOL", fuel:"Gasolina", obs:"Petromoc/Sasol", status:"Com fila", time:"há 2h 17min · pode estar desatualizado", reports:"1 report", coords:[-25.9054,32.6535] },
+
+  { bairro:"Circular Madeira", name:"ENGEN", fuel:"Gas+Diesel", obs:"Circular paragem madeira", status:"Com fila", time:"há 2h 7min · pode estar desatualizado", reports:"1 report", coords:[-25.9029,32.6032] },
+
+  { bairro:"Costa do Sol", name:"ENGEN", fuel:"Gasóleo", obs:"Zona da Costa do Sol", status:"Disponível", time:"há 29 min", reports:"1 report", coords:[-25.9215,32.6508] },
+
+  { bairro:"Hulene", name:"Puma", fuel:"Gas+Diesel", obs:"Sitoe", status:"Com fila", time:"há 8 min", reports:"1 report", coords:[-25.8907,32.5634] },
+
+  { bairro:"Inhagoia Benfica", name:"GALP", fuel:"Gas+Diesel", obs:"Inhagoia", status:"Com fila", time:"há 1h 41min · pode estar desatualizado", reports:"1 report", coords:[-25.8784,32.5337] },
+
+  { bairro:"Kumbeza", name:"Puma", fuel:"Gas+Diesel", obs:"Av. de Moçambique entre a ponte de Zimpeto e a portagem de Kumbeza", status:"Com fila", time:"há 2h 46min · pode estar desatualizado", reports:"1 report", coords:[-25.8402,32.4919] },
+
+  { bairro:"Mafalala", name:"TOTAL", fuel:"Sem informação", obs:"Total próximo ao Grupo Mica", status:"Esgotado", time:"há 2h 45min · pode estar desatualizado", reports:"1 report", coords:[-25.9446,32.5665] },
+
+  { bairro:"Mahotas", name:"SASOL", fuel:"Gasóleo", obs:"Dom Alexandre", status:"Disponível", time:"há 58 min", reports:"1 report", coords:[-25.9018,32.6244] },
+
+  { bairro:"Marracuene", name:"SASOL", fuel:"Gasóleo", obs:"Michafutene", status:"Disponível", time:"há 1h 36min · pode estar desatualizado", reports:"1 report", coords:[-25.7449,32.6648] },
+  { bairro:"Marracuene", name:"GALP", fuel:"Gasolina / Gasóleo", obs:"Ntsivene", status:"Com fila", time:"há 2h 35min · pode estar desatualizado", reports:"1 report", coords:[-25.7342,32.6730] },
+  { bairro:"Marracuene", name:"ENGEN", fuel:"Gas+Diesel", obs:"Só abastece até 1000mts", status:"Disponível", time:"há 2h 57min · pode estar desatualizado", reports:"2 reports confirmam", coords:[-25.7360,32.6711] },
+
+  { bairro:"Muchafutene", name:"GALP", fuel:"Gas+Diesel", obs:"As duas bombas Galp na rotunda do Ntsivene", status:"Com fila", time:"há 2h 50min · pode estar desatualizado", reports:"1 report", coords:[-25.7415,32.6694] },
+
+  { bairro:"Museu", name:"GALP", fuel:"Gas+Diesel", obs:"Avenida Patrício Lumumba", status:"Com fila", time:"há 29 min", reports:"2 reports confirmam", coords:[-25.9652,32.5895] },
+  { bairro:"Museu", name:"TOTAL", fuel:"Gasolina", obs:"", status:"Com fila", time:"há 42 min", reports:"1 report", coords:[-25.9661,32.5881] },
+  { bairro:"Museu", name:"ENGEN", fuel:"Gasóleo", obs:"Próximo ao Hotel Cardoso", status:"Com fila", time:"há 2h 42min · pode estar desatualizado", reports:"1 report", coords:[-25.9680,32.5870] },
+
+  { bairro:"Zimpeto", name:"Puma", fuel:"Gas+Diesel", obs:"Zimpeto", status:"Com fila", time:"há 25 min", reports:"1 report", coords:[-25.8792,32.4935] }
+];
+
+let rows = [...MANUAL_POINTS];
+
+const markersLayer = L.layerGroup();
+
+const map = L.map("map", {
+  zoomControl: true
+}).setView(CENTERS[city], 12);
+
+L.tileLayer(
+  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+  {
+    attribution: "© OpenStreetMap © CARTO",
+    subdomains: "abcd",
+    maxZoom: 20
+  }
+).addTo(map);
+
+markersLayer.addTo(map);
+
+function normalize(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function classify(point) {
+  const status = normalize(point.status);
+
+  if (status.includes("disponivel")) return "verde";
+  if (status.includes("fila")) return "amarelo";
+  if (status.includes("esgotado")) return "vermelho";
+
+  return "cinza";
+}
+
+function color(status) {
+  return {
+    verde: "#2d7a3a",
+    amarelo: "#b07d00",
+    vermelho: "#c0392b",
+    cinza: "#888"
+  }[status];
+}
+
+function label(status) {
+  return {
+    verde: "Disponível",
+    amarelo: "Com fila",
+    vermelho: "Esgotado",
+    cinza: "Sem confirmação"
+  }[status];
+}
+
+function markerIcon(status) {
+  return L.divIcon({
+    className: "",
+    html: `
+      <div
+        class="marker"
+        style="background:${color(status)}"
+      ></div>
+    `,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11]
+  });
+}
+
+function mapsUrl(coords) {
+  if (!userPosition) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${coords[0]},${coords[1]}`;
+  }
+
+  return `https://www.google.com/maps/dir/?api=1&origin=${userPosition[0]},${userPosition[1]}&destination=${coords[0]},${coords[1]}`;
+}
+
+function popupHtml(point, status) {
+  return `
+    <div style="
+      min-width:245px;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    ">
+
+      <div style="
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin-bottom:12px;
+      ">
+
+        <div style="
+          width:14px;
+          height:14px;
+          border-radius:50%;
+          background:${color(status)};
+          box-shadow:0 0 0 6px ${color(status)}22;
+        "></div>
+
+        <div>
+          <div style="
+            font-size:16px;
+            font-weight:900;
+            color:#111827;
+            line-height:1.2;
+          ">
+            ${point.name}
+          </div>
+
+          <div style="
+            font-size:11px;
+            color:#64748b;
+            margin-top:2px;
+            font-weight:700;
+          ">
+            ${point.bairro}
+          </div>
+        </div>
+
+      </div>
+
+      <div style="
+        display:inline-block;
+        padding:6px 10px;
+        border-radius:999px;
+        background:${color(status)}18;
+        color:${color(status)};
+        font-size:11px;
+        font-weight:900;
+        margin-bottom:12px;
+      ">
+        ${label(status)}
+      </div>
+
+      <div style="
+        background:#f8fafc;
+        border:1px solid #e5e7eb;
+        border-radius:16px;
+        padding:12px;
+        font-size:12px;
+        color:#475569;
+        line-height:1.7;
+      ">
+
+        <div>
+          <strong style="color:#111827">Combustível:</strong>
+          ${point.fuel || "Sem informação"}
+        </div>
+
+        <div>
+          <strong style="color:#111827">Nota:</strong>
+          ${point.obs || "Sem comentários"}
+        </div>
+
+        <div>
+          <strong style="color:#111827">Reportado:</strong>
+          ${point.time || "Sem data"}
+        </div>
+
+        <div>
+          <strong style="color:#111827">Confirmação:</strong>
+          ${point.reports || "1 report"}
+        </div>
+
+      </div>
+
+      <a
+        target="_blank"
+        href="${mapsUrl(point.coords)}"
+        style="
+          display:block;
+          margin-top:14px;
+          padding:11px 12px;
+          border-radius:14px;
+          background:#111827;
+          color:#fff;
+          text-decoration:none;
+          text-align:center;
+          font-size:12px;
+          font-weight:900;
+          box-shadow:0 8px 20px rgba(17,24,39,.22);
+        "
+      >
+        🚗 Abrir rota no Google Maps
+      </a>
+
+    </div>
+  `;
+}
+
+function render() {
+  markersLayer.clearLayers();
+
+  let verde = 0;
+  let amarelo = 0;
+  let vermelho = 0;
+  let visiblePoints = 0;
+
+  const bounds = [];
+
+  rows.forEach(point => {
+    const status = classify(point);
+
+    if (filter !== "todos" && status !== filter) {
+      return;
+    }
+
+    if (status === "verde") verde++;
+    if (status === "amarelo") amarelo++;
+    if (status === "vermelho") vermelho++;
+
+    visiblePoints++;
+
+    bounds.push(point.coords);
+
+    const marker = L.marker(point.coords, {
+      icon: markerIcon(status)
+    });
+
+    marker.bindPopup(popupHtml(point, status));
+    marker.addTo(markersLayer);
+  });
+
+  document.getElementById("statVerde").textContent = verde;
+  document.getElementById("statAmarelo").textContent = amarelo;
+  document.getElementById("statVermelho").textContent = vermelho;
+
+  document.getElementById("meta").textContent =
+    `${rows.length} bombas carregadas · ${visiblePoints} pontos no mapa`;
+
+  if (bounds.length) {
+    map.fitBounds(bounds, {
+      padding: [40, 40],
+      maxZoom: 13
+    });
+  }
+}
+
+document.getElementById("city").addEventListener("change", e => {
+  city = e.target.value;
+
+  if (city === "maputo") {
+    rows = [...MANUAL_POINTS];
+  } else {
+    rows = [];
+  }
+
+  map.setView(CENTERS[city], 12);
+  render();
+});
+
+document.querySelectorAll("button[data-filter]").forEach(btn => {
+  btn.onclick = () => {
+    filter = btn.dataset.filter;
+
+    document
+      .querySelectorAll("button[data-filter]")
+      .forEach(b => b.classList.remove("active"));
+
+    btn.classList.add("active");
+    render();
+  };
+});
+
+document.getElementById("gpsBtn").onclick = () => {
+  navigator.geolocation.watchPosition(
+    pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      userPosition = [lat, lng];
+
+      const icon = L.divIcon({
+        className: "",
+        html: '<div class="user-marker"></div>',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+
+      L.marker([lat, lng], { icon }).addTo(map);
+      map.setView([lat, lng], 14);
+    },
+    () => alert("GPS não disponível"),
+    {
+      enableHighAccuracy: true
+    }
+  );
+};
+
+document.getElementById("refreshBtn").onclick = async () => {
+  const btn = document.getElementById("refreshBtn");
+
+  btn.innerHTML = "⟳ Atualizando...";
+  btn.disabled = true;
+
+  setTimeout(() => {
+    rows = city === "maputo" ? [...MANUAL_POINTS] : [];
+    render();
+
+    btn.innerHTML = "↻ Refrescar";
+    btn.disabled = false;
+  }, 500);
+};
+
+render();
+</script>
+
+</body>
+</html>
