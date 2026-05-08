@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="pt">
+<head>
+
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Mapa — Há Combustível</title>
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+
+html,
+body,
+#map {
+
+  height:100%;
+  margin:0;
+
+}
+
+body {
+
+  font-family:
+  -apple-system,
+  BlinkMacSystemFont,
+  "Segoe UI",
+  sans-serif;
+
+}
+
+#map {
+
+  width:100%;
+  height:100%;
+
+}
+
+.panel {
+
+  position:fixed;
+
+  top:12px;
+  left:12px;
+  right:12px;
+
+  z-index:1000;
+
+  max-width:620px;
+
+  background:#fff;
+
+  border-radius:16px;
+
+  padding:12px;
+
+  box-shadow:
+  0 8px 28px rgba(0,0,0,.18);
+
+}
+
+.title {
+
+  font-size:16px;
+  font-weight:700;
+
+  margin-bottom:10px;
+
+}
+
+.row {
+
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+
+}
+
+button,
+select {
+
+  border:1px solid #ddd;
+
+  background:#fff;
+
+  border-radius:10px;
+
+  padding:8px 12px;
+
+  cursor:pointer;
+
+  font-size:13px;
+
+}
+
+button.active {
+
+  background:#111;
+  color:#fff;
+
+}
+
+.gps-btn {
+
+  background:#185fa5;
+  color:#fff;
+  border:none;
+
+}
+
+.meta {
+
+  margin-top:10px;
+
+  font-size:12px;
+
+  color:#666;
+
+}
+
+.route-btn {
+
+  display:inline-block;
+
+  margin-top:8px;
+
+  padding:8px 12px;
+
+  background:#111;
+
+  color:#fff !important;
+
+  border-radius:8px;
+
+  text-decoration:none;
+
+  font-size:13px;
+
+  font-weight:700;
+
+}
+
+.user-marker {
+
+  background:#185fa5;
+
+  border:3px solid #fff;
+
+  border-radius:50%;
+
+  width:18px;
+  height:18px;
+
+  box-shadow:
+  0 0 0 6px rgba(24,95,165,.22);
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="panel">
+
+  <div class="title">
+    🗺️ Mapa interactivo
+  </div>
+
+  <div class="row">
+
+    <select id="city">
+
+      <option value="maputo">
+        Maputo
+      </option>
+
+      <option value="beira">
+        Beira
+      </option>
+
+    </select>
+
+    <button
+      data-filter="todos"
+      class="active"
+    >
+      Todos
+    </button>
+
+    <button data-filter="verde">
+      Disponível
+    </button>
+
+    <button data-filter="amarelo">
+      Com fila
+    </button>
+
+    <button data-filter="vermelho">
+      Esgotado
+    </button>
+
+    <button id="gpsBtn" class="gps-btn">
+      📍 GPS
+    </button>
+
+  </div>
+
+  <div class="meta" id="meta">
+    A carregar...
+  </div>
+
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<script>
+
+const SHEETS = {
+
+  maputo:
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJLGaDPJZPNQFExrKPrBQgW1gj5dW_ok9IE-zaTDygqgLMSNC1AJ2n8glafewBBYO1GFT0ZXqGV9GI/pub?output=csv",
+
+  beira:
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQBKUQVL12UeBRTNyqaCFbD10TUNZJM2Igr8uGoXksSywtJ-S7y5mkwyVJO_afKGrnRZzJfExmQM-Sm/pub?gid=208127512&single=true&output=csv"
+
+};
+
+const CENTERS = {
+
+  maputo:
+  [-25.9653, 32.5892],
+
+  beira:
+  [-19.8332, 34.8424]
+
+};
+
+let city = "maputo";
+
+let filter = "todos";
+
+let rows = [];
+
+let userPosition = null;
+
+let markersLayer =
+L.layerGroup();
+
+const map =
+L.map("map")
+.setView(
+  CENTERS[city],
+  12
+);
+
+L.tileLayer(
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    attribution:
+    "&copy; OpenStreetMap"
+  }
+).addTo(map);
+
+markersLayer.addTo(map);
+
+document
+.getElementById("city")
+.addEventListener(
+  "change",
+  e => {
+
+    city = e.target.value;
+
+    map.setView(
+      CENTERS[city],
+      12
+    );
+
+    loadData();
+
+  }
+);
+
+document
+.querySelectorAll(
+  "button[data-filter]"
+)
+.forEach(btn => {
+
+  btn.onclick = () => {
+
+    filter =
+    btn.dataset.filter;
+
+    document
+    .querySelectorAll(
+      "button[data-filter]"
+    )
+    .forEach(
+      b => b.classList.remove("active")
+    );
+
+    btn.classList.add("active");
+
+    render();
+
+  };
+
+});
+
+function classify(row) {
+
+  const txt =
+  Object.values(row)
+  .join(" ")
+  .toLowerCase();
+
+  if (
+    txt.includes("disponível") ||
+    txt.includes("sem fila")
+  ) return "verde";
+
+  if (
+    txt.includes("fila")
+  ) return "amarelo";
+
+  if (
+    txt.includes("esgotado")
+  ) return "vermelho";
+
+  return "cinza";
+
+}
+
+function color(status) {
+
+  return {
+
+    verde:"#2d7a3a",
+
+    amarelo:"#b07d00",
+
+    vermelho:"#c0392b",
+
+    cinza:"#888"
+
+  }[status];
+
+}
+
+function mapsUrl(coords) {
+
+  if (!userPosition) {
+
+    return `
+https://www.google.com/maps/dir/?api=1&destination=${coords[0]},${coords[1]}
+`;
+
+  }
+
+  return `
+https://www.google.com/maps/dir/?api=1&origin=${userPosition[0]},${userPosition[1]}&destination=${coords[0]},${coords[1]}&travelmode=driving
+`;
+
+}
+
+async function geocode(row) {
+
+  const station =
+  row[
+    "Nome da bomba de combustível / Fuel station name"
+  ] || "";
+
+  const bairro =
+  row[
+    "Bairro / Neighbourhood"
+  ] || "";
+
+  const query =
+  encodeURIComponent(
+    `${station} ${bairro} ${city} Mozambique`
+  );
+
+  const url =
+  `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${query}`;
+
+  const response =
+  await fetch(url);
+
+  const data =
+  await response.json();
+
+  if (!data.length)
+  return null;
+
+  return [
+
+    parseFloat(data[0].lat),
+
+    parseFloat(data[0].lon)
+
+  ];
+
+}
+
+async function loadData() {
+
+  document
+  .getElementById("meta")
+  .innerHTML =
+  "A carregar...";
+
+  const csv =
+  await fetch(
+    SHEETS[city]
+  ).then(
+    r => r.text()
+  );
+
+  rows =
+  Papa.parse(
+    csv,
+    {
+      header:true
+    }
+  ).data;
+
+  render();
+
+  document
+  .getElementById("meta")
+  .innerHTML =
+  rows.length +
+  " reports";
+
+}
+
+async function render() {
+
+  markersLayer.clearLayers();
+
+  const visible =
+  rows.filter(r => {
+
+    return (
+      filter === "todos" ||
+      classify(r) === filter
+    );
+
+  });
+
+  for (const row of visible) {
+
+    const coords =
+    await geocode(row);
+
+    if (!coords)
+    continue;
+
+    const marker =
+    L.circleMarker(
+      coords,
+      {
+
+        radius:8,
+
+        color:
+        color(classify(row)),
+
+        fillColor:
+        color(classify(row)),
+
+        fillOpacity:0.9
+
+      }
+    );
+
+    marker.bindPopup(`
+
+      <strong>
+${row["Nome da bomba de combustível / Fuel station name"] || ""}
+      </strong>
+
+      <br>
+
+${row["Bairro / Neighbourhood"] || ""}
+
+      <br><br>
+
+      <a
+        class="route-btn"
+        target="_blank"
+        href="${mapsUrl(coords)}"
+      >
+        🚗 Abrir Google Maps
+      </a>
+
+    `);
+
+    marker.addTo(markersLayer);
+
+  }
+
+}
+
+document
+.getElementById("gpsBtn")
+.onclick = () => {
+
+  navigator
+  .geolocation
+  .watchPosition(
+
+    pos => {
+
+      const lat =
+      pos.coords.latitude;
+
+      const lng =
+      pos.coords.longitude;
+
+      userPosition =
+      [lat, lng];
+
+      const icon =
+      L.divIcon({
+
+        className:"",
+
+        html:
+'<div class="user-marker"></div>',
+
+        iconSize:[18,18]
+
+      });
+
+      L.marker(
+        [lat,lng],
+        { icon }
+      )
+      .addTo(map);
+
+      map.setView(
+        [lat,lng],
+        14
+      );
+
+    },
+
+    err => {
+
+      alert(
+        "GPS não disponível"
+      );
+
+    },
+
+    {
+
+      enableHighAccuracy:true
+
+    }
+
+  );
+
+};
+
+loadData();
+
+</script>
+
+</body>
+</html>
