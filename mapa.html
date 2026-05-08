@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="pt">
 <head>
-
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
@@ -14,182 +13,316 @@
 
 <style>
 
+*{
+  box-sizing:border-box;
+}
+
 html,
 body,
-#map {
-
+#map{
   height:100%;
   margin:0;
-
 }
 
-body {
-
-  font-family:
-  -apple-system,
-  BlinkMacSystemFont,
-  "Segoe UI",
-  sans-serif;
-
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:#0f1115;
 }
 
-#map {
-
+#map{
   width:100%;
   height:100%;
-
 }
 
-.panel {
+/* PANEL */
 
+.panel{
   position:fixed;
-
-  top:12px;
-  left:12px;
-  right:12px;
-
+  top:16px;
+  left:16px;
   z-index:1000;
 
-  max-width:620px;
+  width:390px;
+  max-width:calc(100vw - 32px);
 
+  background:rgba(17,24,39,.92);
+
+  border:1px solid rgba(255,255,255,.08);
+
+  border-radius:24px;
+
+  padding:18px;
+
+  backdrop-filter:blur(18px);
+
+  box-shadow:
+    0 18px 60px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.05);
+
+  color:#fff;
+}
+
+.panel-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+
+  margin-bottom:14px;
+}
+
+.title{
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:-0.03em;
+}
+
+.subtitle{
+  font-size:12px;
+  color:#9ca3af;
+  margin-top:4px;
+}
+
+.back-btn{
+  text-decoration:none;
+  color:#fff;
+
+  background:rgba(255,255,255,.08);
+
+  border:1px solid rgba(255,255,255,.08);
+
+  padding:9px 12px;
+
+  border-radius:12px;
+
+  font-size:12px;
+  font-weight:800;
+}
+
+/* CONTROLS */
+
+.controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+
+  margin-bottom:14px;
+}
+
+select,
+button{
+  border:none;
+  border-radius:999px;
+
+  padding:10px 12px;
+
+  font-size:12px;
+  font-weight:800;
+
+  cursor:pointer;
+}
+
+select{
   background:#fff;
+  color:#111827;
+}
 
-  border-radius:16px;
+button{
+  background:rgba(255,255,255,.08);
+  color:#e5e7eb;
+}
+
+button.active{
+  background:#fff;
+  color:#111827;
+}
+
+.gps-btn{
+  background:#185fa5;
+  color:#fff;
+}
+
+/* STATS */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+
+  margin-bottom:14px;
+}
+
+.stat{
+  background:rgba(255,255,255,.06);
+
+  border:1px solid rgba(255,255,255,.08);
+
+  border-radius:18px;
 
   padding:12px;
 
-  box-shadow:
-  0 8px 28px rgba(0,0,0,.18);
-
+  text-align:center;
 }
 
-.title {
-
-  font-size:16px;
-  font-weight:700;
-
-  margin-bottom:10px;
-
+.stat strong{
+  display:block;
+  font-size:22px;
+  margin-bottom:2px;
 }
 
-.row {
+.stat span{
+  font-size:11px;
+  color:#9ca3af;
+}
 
+.meta{
+  font-size:12px;
+  color:#cbd5e1;
+}
+
+/* LEGEND */
+
+.legend{
   display:flex;
-  gap:8px;
+  gap:10px;
   flex-wrap:wrap;
 
+  margin-top:14px;
 }
 
-button,
-select {
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
 
-  border:1px solid #ddd;
-
-  background:#fff;
-
-  border-radius:10px;
-
-  padding:8px 12px;
-
-  cursor:pointer;
-
-  font-size:13px;
-
+  font-size:11px;
+  color:#cbd5e1;
 }
 
-button.active {
-
-  background:#111;
-  color:#fff;
-
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
 }
 
-.gps-btn {
+/* MARKERS */
 
-  background:#185fa5;
-  color:#fff;
-  border:none;
+.marker{
+  width:22px;
+  height:22px;
 
+  border-radius:50%;
+
+  border:3px solid #fff;
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.35),
+    0 0 0 6px rgba(255,255,255,.12);
 }
 
-.meta {
+.user-marker{
+  width:18px;
+  height:18px;
 
-  margin-top:10px;
-
-  font-size:12px;
-
-  color:#666;
-
-}
-
-.route-btn {
-
-  display:inline-block;
-
-  margin-top:8px;
-
-  padding:8px 12px;
-
-  background:#111;
-
-  color:#fff !important;
-
-  border-radius:8px;
-
-  text-decoration:none;
-
-  font-size:13px;
-
-  font-weight:700;
-
-}
-
-.user-marker {
+  border-radius:50%;
 
   background:#185fa5;
 
   border:3px solid #fff;
 
-  border-radius:50%;
+  box-shadow:0 0 0 10px rgba(24,95,165,.20);
+}
 
-  width:18px;
-  height:18px;
+/* POPUP */
 
-  box-shadow:
-  0 0 0 6px rgba(24,95,165,.22);
+.leaflet-popup-content-wrapper{
+  border-radius:22px;
+  padding:4px;
+}
+
+.leaflet-popup-tip{
+  background:#fff;
+}
+
+/* FAB */
+
+.fab-reportar{
+  position:fixed;
+
+  left:50%;
+  bottom:22px;
+
+  transform:translateX(-50%);
+
+  z-index:1200;
+
+  background:#1a1a18;
+  color:#f5f5f0;
+
+  padding:15px 28px;
+
+  border-radius:999px;
+
+  font-size:14px;
+  font-weight:900;
+
+  text-decoration:none;
+
+  box-shadow:0 10px 28px rgba(0,0,0,.35);
+}
+
+.fab-reportar:hover{
+  background:#333;
+}
+
+/* MOBILE */
+
+@media(max-width:520px){
+
+  .panel{
+    width:auto;
+    left:10px;
+    right:10px;
+    top:10px;
+  }
 
 }
 
 </style>
-
 </head>
 
 <body>
 
 <div class="panel">
 
-  <div class="title">
-    🗺️ Mapa interactivo
+  <div class="panel-top">
+
+    <div>
+
+      <div class="title">
+        🗺️ Mapa interactivo
+      </div>
+
+      <div class="subtitle">
+        Disponibilidade de combustível em tempo real
+      </div>
+
+    </div>
+
+    <a class="back-btn" href="index.html">
+      ← Voltar
+    </a>
+
   </div>
 
-  <div class="row">
+  <div class="controls">
 
     <select id="city">
-
-      <option value="maputo">
-        Maputo
-      </option>
-
-      <option value="beira">
-        Beira
-      </option>
-
+      <option value="maputo">Maputo</option>
+      <option value="beira">Beira</option>
     </select>
 
-    <button
-      data-filter="todos"
-      class="active"
-    >
+    <button class="active" data-filter="todos">
       Todos
     </button>
 
@@ -209,15 +342,65 @@ button.active {
       📍 GPS
     </button>
 
+    <button id="refreshBtn">
+      ↻ Refresh
+    </button>
+
+  </div>
+
+  <div class="stats">
+
+    <div class="stat">
+      <strong id="statVerde">0</strong>
+      <span>disponível</span>
+    </div>
+
+    <div class="stat">
+      <strong id="statAmarelo">0</strong>
+      <span>com fila</span>
+    </div>
+
+    <div class="stat">
+      <strong id="statVermelho">0</strong>
+      <span>esgotado</span>
+    </div>
+
   </div>
 
   <div class="meta" id="meta">
-    A carregar...
+    A carregar dados...
+  </div>
+
+  <div class="legend">
+
+    <div class="legend-item">
+      <span class="dot" style="background:#2d7a3a"></span>
+      Disponível
+    </div>
+
+    <div class="legend-item">
+      <span class="dot" style="background:#b07d00"></span>
+      Com fila
+    </div>
+
+    <div class="legend-item">
+      <span class="dot" style="background:#c0392b"></span>
+      Esgotado
+    </div>
+
   </div>
 
 </div>
 
 <div id="map"></div>
+
+<a
+  class="fab-reportar"
+  href="https://docs.google.com/forms/d/e/1FAIpQLSfv-UJyaqEVK3CF_c9yQaq1iE6Lr4dHmJhd0nU9DGRYhLxcCQ/viewform"
+  target="_blank"
+>
+  + Reportar uma bomba
+</a>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -236,79 +419,381 @@ const SHEETS = {
 };
 
 const CENTERS = {
-
-  maputo:
-  [-25.9653, 32.5892],
-
-  beira:
-  [-19.8332, 34.8424]
-
+  maputo:[-25.9653,32.5892],
+  beira:[-19.8332,34.8424]
 };
 
 let city = "maputo";
-
 let filter = "todos";
-
 let rows = [];
-
 let userPosition = null;
 
-let markersLayer =
-L.layerGroup();
+const markersLayer = L.layerGroup();
 
-const map =
-L.map("map")
-.setView(
-  CENTERS[city],
-  12
-);
+const map = L.map("map",{
+  zoomControl:true
+}).setView(CENTERS[city],12);
 
 L.tileLayer(
-  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
   {
-    attribution:
-    "&copy; OpenStreetMap"
+    attribution:"© OpenStreetMap © CARTO",
+    subdomains:"abcd",
+    maxZoom:20
   }
 ).addTo(map);
 
 markersLayer.addTo(map);
 
-document
-.getElementById("city")
-.addEventListener(
-  "change",
-  e => {
+const knownCoords = {
+  galp:[-25.9229,32.5729],
+  engen:[-25.9443,32.5731],
+  total:[-25.9653,32.5892],
+  petromoc:[-25.9672,32.5775],
+  bp:[-25.9557,32.5884],
+  shell:[-25.9714,32.5898]
+};
 
-    city = e.target.value;
+function normalize(v){
+  return String(v || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"");
+}
 
-    map.setView(
-      CENTERS[city],
-      12
-    );
+function classify(row){
 
-    loadData();
+  const txt = normalize(
+    Object.values(row).join(" ")
+  );
+
+  if(
+    txt.includes("disponível") ||
+    txt.includes("disponivel") ||
+    txt.includes("sem fila")
+  ){
+    return "verde";
+  }
+
+  if(
+    txt.includes("fila") ||
+    txt.includes("com fila")
+  ){
+    return "amarelo";
+  }
+
+  if(
+    txt.includes("esgotado") ||
+    txt.includes("sem combustível") ||
+    txt.includes("sem combustivel")
+  ){
+    return "vermelho";
+  }
+
+  return "cinza";
+}
+
+function color(status){
+
+  return {
+    verde:"#2d7a3a",
+    amarelo:"#b07d00",
+    vermelho:"#c0392b",
+    cinza:"#888"
+  }[status];
+
+}
+
+function label(status){
+
+  return {
+    verde:"Disponível",
+    amarelo:"Com fila",
+    vermelho:"Esgotado",
+    cinza:"Sem confirmação"
+  }[status];
+
+}
+
+function markerIcon(status){
+
+  return L.divIcon({
+    className:"",
+    html:`
+      <div
+        class="marker"
+        style="background:${color(status)}"
+      ></div>
+    `,
+    iconSize:[22,22],
+    iconAnchor:[11,11]
+  });
+
+}
+
+async function geocode(name){
+
+  const n = normalize(name);
+
+  for(const key in knownCoords){
+
+    if(n.includes(key)){
+      return knownCoords[key];
+    }
 
   }
-);
+
+  const url =
+    "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" +
+    encodeURIComponent(name + " Mozambique");
+
+  try{
+
+    const r = await fetch(url);
+    const data = await r.json();
+
+    if(!data.length) return null;
+
+    return [
+      parseFloat(data[0].lat),
+      parseFloat(data[0].lon)
+    ];
+
+  }catch{
+    return null;
+  }
+
+}
+
+function mapsUrl(coords){
+
+  if(!userPosition){
+
+    return `https://www.google.com/maps/dir/?api=1&destination=${coords[0]},${coords[1]}`;
+
+  }
+
+  return `https://www.google.com/maps/dir/?api=1&origin=${userPosition[0]},${userPosition[1]}&destination=${coords[0]},${coords[1]}`;
+
+}
+
+async function loadData(){
+
+  document.getElementById("meta").textContent =
+    "A carregar dados...";
+
+  const csv =
+    await fetch(SHEETS[city])
+    .then(r => r.text());
+
+  rows = Papa.parse(csv,{
+    header:true,
+    skipEmptyLines:true
+  }).data;
+
+  render();
+
+}
+
+async function render(){
+
+  markersLayer.clearLayers();
+
+  let verde = 0;
+  let amarelo = 0;
+  let vermelho = 0;
+
+  for(const row of rows){
+
+    const name =
+      row["Nome da bomba de combustível / Fuel station name"] ||
+      row["Posto"] ||
+      row["Bomba"];
+
+    if(!name) continue;
+
+    const status = classify(row);
+
+    if(filter !== "todos" && status !== filter){
+      continue;
+    }
+
+    if(status === "verde") verde++;
+    if(status === "amarelo") amarelo++;
+    if(status === "vermelho") vermelho++;
+
+    const coords = await geocode(name);
+
+    if(!coords) continue;
+
+    const marker = L.marker(coords,{
+      icon:markerIcon(status)
+    });
+
+    marker.bindPopup(`
+
+      <div style="
+        min-width:240px;
+        font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      ">
+
+        <div style="
+          display:flex;
+          align-items:center;
+          gap:10px;
+          margin-bottom:12px;
+        ">
+
+          <div style="
+            width:14px;
+            height:14px;
+            border-radius:50%;
+            background:${color(status)};
+            box-shadow:0 0 0 6px ${color(status)}22;
+          "></div>
+
+          <div style="
+            font-size:16px;
+            font-weight:900;
+            color:#111827;
+            line-height:1.2;
+          ">
+            ${name}
+          </div>
+
+        </div>
+
+        <div style="
+          display:inline-block;
+          padding:6px 10px;
+          border-radius:999px;
+          background:${color(status)}18;
+          color:${color(status)};
+          font-size:11px;
+          font-weight:900;
+          margin-bottom:12px;
+        ">
+          ${label(status)}
+        </div>
+
+        <div style="
+          background:#f8fafc;
+          border:1px solid #e5e7eb;
+          border-radius:16px;
+          padding:12px;
+          font-size:12px;
+          color:#475569;
+          line-height:1.7;
+        ">
+
+          <div>
+            <strong style="color:#111827">
+              Combustível:
+            </strong>
+
+            ${
+              row["Combustível disponível / Available fuel"] ||
+              "Não indicado"
+            }
+          </div>
+
+          <div>
+            <strong style="color:#111827">
+              Observação:
+            </strong>
+
+            ${
+              row["Observações / Additional notes"] ||
+              "Sem observações"
+            }
+          </div>
+
+          <div>
+            <strong style="color:#111827">
+              Reportado:
+            </strong>
+
+            ${
+              row["Carimbo de data/hora"] ||
+              "Sem data"
+            }
+          </div>
+
+        </div>
+
+        <a
+          target="_blank"
+          href="${mapsUrl(coords)}"
+
+          style="
+            display:block;
+            margin-top:14px;
+
+            padding:11px 12px;
+
+            border-radius:14px;
+
+            background:#111827;
+            color:#fff;
+
+            text-decoration:none;
+
+            text-align:center;
+
+            font-size:12px;
+            font-weight:900;
+
+            box-shadow:0 8px 20px rgba(17,24,39,.22);
+          "
+        >
+          🚗 Abrir rota no Google Maps
+        </a>
+
+      </div>
+
+    `);
+
+    marker.addTo(markersLayer);
+
+  }
+
+  document.getElementById("statVerde").textContent =
+    verde;
+
+  document.getElementById("statAmarelo").textContent =
+    amarelo;
+
+  document.getElementById("statVermelho").textContent =
+    vermelho;
+
+  document.getElementById("meta").textContent =
+    rows.length + " informes carregados";
+
+}
 
 document
-.querySelectorAll(
-  "button[data-filter]"
-)
+.getElementById("city")
+.addEventListener("change",e => {
+
+  city = e.target.value;
+
+  map.setView(CENTERS[city],12);
+
+  loadData();
+
+});
+
+document
+.querySelectorAll("button[data-filter]")
 .forEach(btn => {
 
   btn.onclick = () => {
 
-    filter =
-    btn.dataset.filter;
+    filter = btn.dataset.filter;
 
     document
-    .querySelectorAll(
-      "button[data-filter]"
-    )
-    .forEach(
-      b => b.classList.remove("active")
-    );
+      .querySelectorAll("button[data-filter]")
+      .forEach(b => b.classList.remove("active"));
 
     btn.classList.add("active");
 
@@ -318,260 +803,58 @@ document
 
 });
 
-function classify(row) {
-
-  const txt =
-  Object.values(row)
-  .join(" ")
-  .toLowerCase();
-
-  if (
-    txt.includes("disponível") ||
-    txt.includes("sem fila")
-  ) return "verde";
-
-  if (
-    txt.includes("fila")
-  ) return "amarelo";
-
-  if (
-    txt.includes("esgotado")
-  ) return "vermelho";
-
-  return "cinza";
-
-}
-
-function color(status) {
-
-  return {
-
-    verde:"#2d7a3a",
-
-    amarelo:"#b07d00",
-
-    vermelho:"#c0392b",
-
-    cinza:"#888"
-
-  }[status];
-
-}
-
-function mapsUrl(coords) {
-
-  if (!userPosition) {
-
-    return `
-https://www.google.com/maps/dir/?api=1&destination=${coords[0]},${coords[1]}
-`;
-
-  }
-
-  return `
-https://www.google.com/maps/dir/?api=1&origin=${userPosition[0]},${userPosition[1]}&destination=${coords[0]},${coords[1]}&travelmode=driving
-`;
-
-}
-
-async function geocode(row) {
-
-  const station =
-  row[
-    "Nome da bomba de combustível / Fuel station name"
-  ] || "";
-
-  const bairro =
-  row[
-    "Bairro / Neighbourhood"
-  ] || "";
-
-  const query =
-  encodeURIComponent(
-    `${station} ${bairro} ${city} Mozambique`
-  );
-
-  const url =
-  `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${query}`;
-
-  const response =
-  await fetch(url);
-
-  const data =
-  await response.json();
-
-  if (!data.length)
-  return null;
-
-  return [
-
-    parseFloat(data[0].lat),
-
-    parseFloat(data[0].lon)
-
-  ];
-
-}
-
-async function loadData() {
-
-  document
-  .getElementById("meta")
-  .innerHTML =
-  "A carregar...";
-
-  const csv =
-  await fetch(
-    SHEETS[city]
-  ).then(
-    r => r.text()
-  );
-
-  rows =
-  Papa.parse(
-    csv,
-    {
-      header:true
-    }
-  ).data;
-
-  render();
-
-  document
-  .getElementById("meta")
-  .innerHTML =
-  rows.length +
-  " reports";
-
-}
-
-async function render() {
-
-  markersLayer.clearLayers();
-
-  const visible =
-  rows.filter(r => {
-
-    return (
-      filter === "todos" ||
-      classify(r) === filter
-    );
-
-  });
-
-  for (const row of visible) {
-
-    const coords =
-    await geocode(row);
-
-    if (!coords)
-    continue;
-
-    const marker =
-    L.circleMarker(
-      coords,
-      {
-
-        radius:8,
-
-        color:
-        color(classify(row)),
-
-        fillColor:
-        color(classify(row)),
-
-        fillOpacity:0.9
-
-      }
-    );
-
-    marker.bindPopup(`
-
-      <strong>
-${row["Nome da bomba de combustível / Fuel station name"] || ""}
-      </strong>
-
-      <br>
-
-${row["Bairro / Neighbourhood"] || ""}
-
-      <br><br>
-
-      <a
-        class="route-btn"
-        target="_blank"
-        href="${mapsUrl(coords)}"
-      >
-        🚗 Abrir Google Maps
-      </a>
-
-    `);
-
-    marker.addTo(markersLayer);
-
-  }
-
-}
-
 document
 .getElementById("gpsBtn")
 .onclick = () => {
 
-  navigator
-  .geolocation
-  .watchPosition(
+  navigator.geolocation.watchPosition(
 
     pos => {
 
-      const lat =
-      pos.coords.latitude;
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
 
-      const lng =
-      pos.coords.longitude;
+      userPosition = [lat,lng];
 
-      userPosition =
-      [lat, lng];
-
-      const icon =
-      L.divIcon({
-
+      const icon = L.divIcon({
         className:"",
-
-        html:
-'<div class="user-marker"></div>',
-
-        iconSize:[18,18]
-
+        html:'<div class="user-marker"></div>',
+        iconSize:[18,18],
+        iconAnchor:[9,9]
       });
 
-      L.marker(
-        [lat,lng],
-        { icon }
-      )
-      .addTo(map);
+      L.marker([lat,lng],{
+        icon
+      }).addTo(map);
 
-      map.setView(
-        [lat,lng],
-        14
-      );
+      map.setView([lat,lng],14);
 
     },
 
-    err => {
-
-      alert(
-        "GPS não disponível"
-      );
-
-    },
+    () => alert("GPS não disponível"),
 
     {
-
       enableHighAccuracy:true
-
     }
 
   );
+
+};
+
+document
+.getElementById("refreshBtn")
+.onclick = async () => {
+
+  const btn =
+    document.getElementById("refreshBtn");
+
+  btn.innerHTML = "⟳ Atualizando...";
+  btn.disabled = true;
+
+  await loadData();
+
+  btn.innerHTML = "↻ Refresh";
+  btn.disabled = false;
 
 };
 
