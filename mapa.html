@@ -6,288 +6,350 @@
 
 <title>Mapa — Há Combustível</title>
 
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-
-*{
-  box-sizing:border-box;
+* {
+  box-sizing: border-box;
 }
 
 html,
 body,
-#map{
-  height:100%;
-  margin:0;
+#map {
+  height: 100%;
+  margin: 0;
 }
 
-body{
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:#0f1115;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #0f1115;
 }
 
-#map{
-  width:100%;
-  height:100%;
+#map {
+  width: 100%;
+  height: 100%;
 }
 
 /* PANEL */
 
-.panel{
-  position:fixed;
-  top:16px;
-  left:16px;
-  z-index:1000;
+.panel {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 1000;
 
-  width:390px;
-  max-width:calc(100vw - 32px);
+  width: 410px;
+  max-width: calc(100vw - 36px);
 
-  background:rgba(17,24,39,.92);
+  background: rgba(17, 24, 39, .94);
+  color: #fff;
 
-  border:1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 26px;
 
-  border-radius:24px;
+  padding: 18px;
 
-  padding:18px;
-
-  backdrop-filter:blur(18px);
+  backdrop-filter: blur(18px);
 
   box-shadow:
-    0 18px 60px rgba(0,0,0,.45),
-    inset 0 1px 0 rgba(255,255,255,.05);
-
-  color:#fff;
+    0 20px 70px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.06);
 }
 
-.panel-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:10px;
-
-  margin-bottom:14px;
+.panel-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.title{
-  font-size:20px;
-  font-weight:900;
-  letter-spacing:-0.03em;
+.title {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
 }
 
-.subtitle{
-  font-size:12px;
-  color:#9ca3af;
-  margin-top:4px;
+.subtitle {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
 }
 
-.back-btn{
-  text-decoration:none;
-  color:#fff;
+.back-btn {
+  text-decoration: none;
+  color: #fff;
 
-  background:rgba(255,255,255,.08);
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.10);
 
-  border:1px solid rgba(255,255,255,.08);
+  padding: 9px 12px;
+  border-radius: 14px;
 
-  padding:9px 12px;
-
-  border-radius:12px;
-
-  font-size:12px;
-  font-weight:800;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 /* CONTROLS */
 
-.controls{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
 
-  margin-bottom:14px;
+.controls select,
+.controls button {
+  width: 100%;
 }
 
 select,
-button{
-  border:none;
-  border-radius:999px;
+button {
+  border: none;
+  border-radius: 999px;
 
-  padding:10px 12px;
+  padding: 10px 12px;
 
-  font-size:12px;
-  font-weight:800;
+  font-size: 12px;
+  font-weight: 800;
 
-  cursor:pointer;
+  cursor: pointer;
 }
 
-select{
-  background:#fff;
-  color:#111827;
+select {
+  background: #fff;
+  color: #111827;
 }
 
-button{
-  background:rgba(255,255,255,.08);
-  color:#e5e7eb;
+button {
+  background: rgba(255,255,255,.09);
+  color: #e5e7eb;
 }
 
-button.active{
-  background:#fff;
-  color:#111827;
+button.active {
+  background: #fff;
+  color: #111827;
 }
 
-.gps-btn{
-  background:#185fa5;
-  color:#fff;
+.gps-btn {
+  background: #185fa5;
+  color: #fff;
+}
+
+.refresh-btn {
+  background: rgba(45,122,58,.22);
+  color: #d1fae5;
 }
 
 /* STATS */
 
-.stats{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-
-  margin-bottom:14px;
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
-.stat{
-  background:rgba(255,255,255,.06);
-
-  border:1px solid rgba(255,255,255,.08);
-
-  border-radius:18px;
-
-  padding:12px;
-
-  text-align:center;
+.stat {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 12px;
+  text-align: center;
 }
 
-.stat strong{
-  display:block;
-  font-size:22px;
-  margin-bottom:2px;
+.stat strong {
+  display: block;
+  font-size: 22px;
+  margin-bottom: 2px;
 }
 
-.stat span{
-  font-size:11px;
-  color:#9ca3af;
+.stat span {
+  font-size: 11px;
+  color: #9ca3af;
 }
 
-.meta{
-  font-size:12px;
-  color:#cbd5e1;
+.meta {
+  font-size: 12px;
+  color: #cbd5e1;
 }
 
 /* LEGEND */
 
-.legend{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-
-  margin-top:14px;
+.legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
 }
 
-.legend-item{
-  display:flex;
-  align-items:center;
-  gap:6px;
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 
-  font-size:11px;
-  color:#cbd5e1;
+  font-size: 11px;
+  color: #cbd5e1;
 }
 
-.dot{
-  width:9px;
-  height:9px;
-  border-radius:50%;
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
 }
 
 /* MARKERS */
 
-.marker{
-  width:22px;
-  height:22px;
+.marker {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
 
-  border-radius:50%;
-
-  border:3px solid #fff;
+  border: 3px solid #fff;
 
   box-shadow:
     0 8px 20px rgba(0,0,0,.35),
-    0 0 0 6px rgba(255,255,255,.12);
+    0 0 0 6px rgba(255,255,255,.14);
 }
 
-.user-marker{
-  width:18px;
-  height:18px;
+.user-marker {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
 
-  border-radius:50%;
+  background: #185fa5;
+  border: 3px solid #fff;
 
-  background:#185fa5;
-
-  border:3px solid #fff;
-
-  box-shadow:0 0 0 10px rgba(24,95,165,.20);
+  box-shadow: 0 0 0 10px rgba(24,95,165,.20);
 }
 
 /* POPUP */
 
-.leaflet-popup-content-wrapper{
-  border-radius:22px;
-  padding:4px;
+.leaflet-popup-content-wrapper {
+  border-radius: 22px;
+  padding: 4px;
 }
 
-.leaflet-popup-tip{
-  background:#fff;
+.leaflet-popup-content {
+  margin: 12px;
+}
+
+.leaflet-popup-tip {
+  background: #fff;
 }
 
 /* FAB */
 
-.fab-reportar{
-  position:fixed;
+.fab-reportar {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 1200;
 
-  left:50%;
-  bottom:22px;
+  background: #1a1a18;
+  color: #f5f5f0;
 
-  transform:translateX(-50%);
+  padding: 15px 28px;
+  border-radius: 999px;
 
-  z-index:1200;
+  font-size: 14px;
+  font-weight: 900;
+  text-decoration: none;
 
-  background:#1a1a18;
-  color:#f5f5f0;
-
-  padding:15px 28px;
-
-  border-radius:999px;
-
-  font-size:14px;
-  font-weight:900;
-
-  text-decoration:none;
-
-  box-shadow:0 10px 28px rgba(0,0,0,.35);
+  box-shadow: 0 10px 28px rgba(0,0,0,.35);
 }
 
-.fab-reportar:hover{
-  background:#333;
+.fab-reportar:hover {
+  background: #333;
 }
 
 /* MOBILE */
 
-@media(max-width:520px){
+@media (max-width: 640px) {
+  .panel {
+    top: 10px;
+    left: 10px;
+    right: 10px;
 
-  .panel{
-    width:auto;
-    left:10px;
-    right:10px;
-    top:10px;
+    width: auto;
+    max-width: none;
+
+    padding: 14px;
+    border-radius: 22px;
   }
 
+  .panel-top {
+    margin-bottom: 12px;
+  }
+
+  .title {
+    font-size: 17px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+  }
+
+  .back-btn {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .controls {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 3px;
+    margin-bottom: 12px;
+  }
+
+  .controls select,
+  .controls button {
+    width: auto;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 9px 11px;
+    font-size: 11px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .stat {
+    padding: 9px 6px;
+    border-radius: 14px;
+  }
+
+  .stat strong {
+    font-size: 18px;
+  }
+
+  .stat span {
+    font-size: 10px;
+  }
+
+  .legend {
+    display: none;
+  }
+
+  .fab-reportar {
+    bottom: 18px;
+    padding: 14px 24px;
+    font-size: 13px;
+  }
 }
 
+@media (min-width: 900px) {
+  .controls {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 </style>
 </head>
 
@@ -296,60 +358,30 @@ button.active{
 <div class="panel">
 
   <div class="panel-top">
-
     <div>
-
-      <div class="title">
-        🗺️ Mapa interactivo
-      </div>
-
-      <div class="subtitle">
-        Disponibilidade de combustível em tempo real
-      </div>
-
+      <div class="title">🗺️ Mapa interactivo</div>
+      <div class="subtitle">Disponibilidade de combustível em tempo real</div>
     </div>
 
-    <a class="back-btn" href="index.html">
-      ← Voltar
-    </a>
-
+    <a class="back-btn" href="index.html">← Voltar</a>
   </div>
 
   <div class="controls">
-
     <select id="city">
       <option value="maputo">Maputo</option>
       <option value="beira">Beira</option>
     </select>
 
-    <button class="active" data-filter="todos">
-      Todos
-    </button>
+    <button class="active" data-filter="todos">Todos</button>
+    <button data-filter="verde">Disponível</button>
+    <button data-filter="amarelo">Com fila</button>
+    <button data-filter="vermelho">Esgotado</button>
 
-    <button data-filter="verde">
-      Disponível
-    </button>
-
-    <button data-filter="amarelo">
-      Com fila
-    </button>
-
-    <button data-filter="vermelho">
-      Esgotado
-    </button>
-
-    <button id="gpsBtn" class="gps-btn">
-      📍 GPS
-    </button>
-
-    <button id="refreshBtn">
-      ↻ Refresh
-    </button>
-
+    <button id="gpsBtn" class="gps-btn">📍 GPS</button>
+    <button id="refreshBtn" class="refresh-btn">↻ Refrescar</button>
   </div>
 
   <div class="stats">
-
     <div class="stat">
       <strong id="statVerde">0</strong>
       <span>disponível</span>
@@ -364,15 +396,11 @@ button.active{
       <strong id="statVermelho">0</strong>
       <span>esgotado</span>
     </div>
-
   </div>
 
-  <div class="meta" id="meta">
-    A carregar dados...
-  </div>
+  <div class="meta" id="meta">A carregar dados...</div>
 
   <div class="legend">
-
     <div class="legend-item">
       <span class="dot" style="background:#2d7a3a"></span>
       Disponível
@@ -387,7 +415,6 @@ button.active{
       <span class="dot" style="background:#c0392b"></span>
       Esgotado
     </div>
-
   </div>
 
 </div>
@@ -403,24 +430,20 @@ button.active{
 </a>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script>
-
 const SHEETS = {
-
   maputo:
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJLGaDPJZPNQFExrKPrBQgW1gj5dW_ok9IE-zaTDygqgLMSNC1AJ2n8glafewBBYO1GFT0ZXqGV9GI/pub?output=csv",
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJLGaDPJZPNQFExrKPrBQgW1gj5dW_ok9IE-zaTDygqgLMSNC1AJ2n8glafewBBYO1GFT0ZXqGV9GI/pub?output=csv",
 
   beira:
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQBKUQVL12UeBRTNyqaCFbD10TUNZJM2Igr8uGoXksSywtJ-S7y5mkwyVJO_afKGrnRZzJfExmQM-Sm/pub?gid=208127512&single=true&output=csv"
-
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQBKUQVL12UeBRTNyqaCFbD10TUNZJM2Igr8uGoXksSywtJ-S7y5mkwyVJO_afKGrnRZzJfExmQM-Sm/pub?gid=208127512&single=true&output=csv"
 };
 
 const CENTERS = {
-  maputo:[-25.9653,32.5892],
-  beira:[-19.8332,34.8424]
+  maputo: [-25.9653, 32.5892],
+  beira: [-19.8332, 34.8424]
 };
 
 let city = "maputo";
@@ -430,210 +453,225 @@ let userPosition = null;
 
 const markersLayer = L.layerGroup();
 
-const map = L.map("map",{
-  zoomControl:true
-}).setView(CENTERS[city],12);
+const map = L.map("map", {
+  zoomControl: true
+}).setView(CENTERS[city], 12);
 
 L.tileLayer(
   "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
   {
-    attribution:"© OpenStreetMap © CARTO",
-    subdomains:"abcd",
-    maxZoom:20
+    attribution: "© OpenStreetMap © CARTO",
+    subdomains: "abcd",
+    maxZoom: 20
   }
 ).addTo(map);
 
 markersLayer.addTo(map);
 
 const knownCoords = {
-  galp:[-25.9229,32.5729],
-  engen:[-25.9443,32.5731],
-  total:[-25.9653,32.5892],
-  petromoc:[-25.9672,32.5775],
-  bp:[-25.9557,32.5884],
-  shell:[-25.9714,32.5898]
+  galp: [-25.9229, 32.5729],
+  engen: [-25.9443, 32.5731],
+  total: [-25.9653, 32.5892],
+  petromoc: [-25.9672, 32.5775],
+  bp: [-25.9557, 32.5884],
+  shell: [-25.9714, 32.5898]
 };
 
-function normalize(v){
-  return String(v || "")
+function normalize(value) {
+  return String(value || "")
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g,"");
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
-function classify(row){
-
-  const txt = normalize(
-    Object.values(row).join(" ")
+function getFuel(row) {
+  return (
+    row["Combustível disponível / Available fuel"] ||
+    row["Combustível"] ||
+    row["Fuel"] ||
+    row["Tipo de combustível"] ||
+    row["Gasolina/Gasóleo"] ||
+    "Sem informação"
   );
+}
 
-  if(
-    txt.includes("disponível") ||
-    txt.includes("disponivel") ||
-    txt.includes("sem fila")
-  ){
+function getObservation(row) {
+  return (
+    row["Observações / Additional notes"] ||
+    row["Observações"] ||
+    row["Additional notes"] ||
+    row["Nota"] ||
+    "Sem comentários"
+  );
+}
+
+function getTimestamp(row) {
+  return (
+    row["Carimbo de data/hora"] ||
+    row["Timestamp"] ||
+    row["Data"] ||
+    row["Hora"] ||
+    "Sem data"
+  );
+}
+
+function getStationName(row) {
+  return (
+    row["Nome da bomba de combustível / Fuel station name"] ||
+    row["Nome da bomba"] ||
+    row["Fuel station name"] ||
+    row["Posto"] ||
+    row["Bomba"] ||
+    ""
+  );
+}
+
+function classify(row) {
+  const text = normalize(Object.values(row).join(" "));
+
+  if (
+    text.includes("disponivel") ||
+    text.includes("disponível") ||
+    text.includes("sem fila")
+  ) {
     return "verde";
   }
 
-  if(
-    txt.includes("fila") ||
-    txt.includes("com fila")
-  ){
+  if (
+    text.includes("fila") ||
+    text.includes("com fila")
+  ) {
     return "amarelo";
   }
 
-  if(
-    txt.includes("esgotado") ||
-    txt.includes("sem combustível") ||
-    txt.includes("sem combustivel")
-  ){
+  if (
+    text.includes("esgotado") ||
+    text.includes("sem combustivel") ||
+    text.includes("sem combustível")
+  ) {
     return "vermelho";
   }
 
   return "cinza";
 }
 
-function color(status){
-
+function color(status) {
   return {
-    verde:"#2d7a3a",
-    amarelo:"#b07d00",
-    vermelho:"#c0392b",
-    cinza:"#888"
+    verde: "#2d7a3a",
+    amarelo: "#b07d00",
+    vermelho: "#c0392b",
+    cinza: "#888"
   }[status];
-
 }
 
-function label(status){
-
+function label(status) {
   return {
-    verde:"Disponível",
-    amarelo:"Com fila",
-    vermelho:"Esgotado",
-    cinza:"Sem confirmação"
+    verde: "Disponível",
+    amarelo: "Com fila",
+    vermelho: "Esgotado",
+    cinza: "Sem confirmação"
   }[status];
-
 }
 
-function markerIcon(status){
-
+function markerIcon(status) {
   return L.divIcon({
-    className:"",
-    html:`
+    className: "",
+    html: `
       <div
         class="marker"
         style="background:${color(status)}"
       ></div>
     `,
-    iconSize:[22,22],
-    iconAnchor:[11,11]
+    iconSize: [22, 22],
+    iconAnchor: [11, 11]
   });
-
 }
 
-async function geocode(name){
+async function geocode(name) {
+  const normalizedName = normalize(name);
 
-  const n = normalize(name);
-
-  for(const key in knownCoords){
-
-    if(n.includes(key)){
+  for (const key in knownCoords) {
+    if (normalizedName.includes(key)) {
       return knownCoords[key];
     }
-
   }
 
   const url =
     "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" +
-    encodeURIComponent(name + " Mozambique");
+    encodeURIComponent(name + " " + city + " Mozambique");
 
-  try{
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
 
-    const r = await fetch(url);
-    const data = await r.json();
-
-    if(!data.length) return null;
+    if (!data.length) return null;
 
     return [
       parseFloat(data[0].lat),
       parseFloat(data[0].lon)
     ];
-
-  }catch{
+  } catch {
     return null;
   }
-
 }
 
-function mapsUrl(coords){
-
-  if(!userPosition){
-
+function mapsUrl(coords) {
+  if (!userPosition) {
     return `https://www.google.com/maps/dir/?api=1&destination=${coords[0]},${coords[1]}`;
-
   }
 
   return `https://www.google.com/maps/dir/?api=1&origin=${userPosition[0]},${userPosition[1]}&destination=${coords[0]},${coords[1]}`;
-
 }
 
-async function loadData(){
+async function loadData() {
+  document.getElementById("meta").textContent = "A carregar dados...";
 
-  document.getElementById("meta").textContent =
-    "A carregar dados...";
+  const csv = await fetch(SHEETS[city]).then(r => r.text());
 
-  const csv =
-    await fetch(SHEETS[city])
-    .then(r => r.text());
-
-  rows = Papa.parse(csv,{
-    header:true,
-    skipEmptyLines:true
+  rows = Papa.parse(csv, {
+    header: true,
+    skipEmptyLines: true
   }).data;
 
   render();
-
 }
 
-async function render(){
-
+async function render() {
   markersLayer.clearLayers();
 
   let verde = 0;
   let amarelo = 0;
   let vermelho = 0;
+  let visiblePoints = 0;
 
-  for(const row of rows){
+  for (const row of rows) {
+    const name = getStationName(row);
 
-    const name =
-      row["Nome da bomba de combustível / Fuel station name"] ||
-      row["Posto"] ||
-      row["Bomba"];
-
-    if(!name) continue;
+    if (!name) continue;
 
     const status = classify(row);
 
-    if(filter !== "todos" && status !== filter){
+    if (filter !== "todos" && status !== filter) {
       continue;
     }
 
-    if(status === "verde") verde++;
-    if(status === "amarelo") amarelo++;
-    if(status === "vermelho") vermelho++;
+    if (status === "verde") verde++;
+    if (status === "amarelo") amarelo++;
+    if (status === "vermelho") vermelho++;
 
     const coords = await geocode(name);
 
-    if(!coords) continue;
+    if (!coords) continue;
 
-    const marker = L.marker(coords,{
-      icon:markerIcon(status)
+    visiblePoints++;
+
+    const marker = L.marker(coords, {
+      icon: markerIcon(status)
     });
 
     marker.bindPopup(`
-
       <div style="
-        min-width:240px;
+        min-width:245px;
         font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
       ">
 
@@ -687,36 +725,18 @@ async function render(){
         ">
 
           <div>
-            <strong style="color:#111827">
-              Combustível:
-            </strong>
-
-            ${
-              row["Combustível disponível / Available fuel"] ||
-              "Não indicado"
-            }
+            <strong style="color:#111827">Combustível:</strong>
+            ${getFuel(row)}
           </div>
 
           <div>
-            <strong style="color:#111827">
-              Observação:
-            </strong>
-
-            ${
-              row["Observações / Additional notes"] ||
-              "Sem observações"
-            }
+            <strong style="color:#111827">Nota:</strong>
+            ${getObservation(row)}
           </div>
 
           <div>
-            <strong style="color:#111827">
-              Reportado:
-            </strong>
-
-            ${
-              row["Carimbo de data/hora"] ||
-              "Sem data"
-            }
+            <strong style="color:#111827">Reportado:</strong>
+            ${getTimestamp(row)}
           </div>
 
         </div>
@@ -724,25 +744,17 @@ async function render(){
         <a
           target="_blank"
           href="${mapsUrl(coords)}"
-
           style="
             display:block;
             margin-top:14px;
-
             padding:11px 12px;
-
             border-radius:14px;
-
             background:#111827;
             color:#fff;
-
             text-decoration:none;
-
             text-align:center;
-
             font-size:12px;
             font-weight:900;
-
             box-shadow:0 8px 20px rgba(17,24,39,.22);
           "
         >
@@ -750,45 +762,27 @@ async function render(){
         </a>
 
       </div>
-
     `);
 
     marker.addTo(markersLayer);
-
   }
 
-  document.getElementById("statVerde").textContent =
-    verde;
-
-  document.getElementById("statAmarelo").textContent =
-    amarelo;
-
-  document.getElementById("statVermelho").textContent =
-    vermelho;
+  document.getElementById("statVerde").textContent = verde;
+  document.getElementById("statAmarelo").textContent = amarelo;
+  document.getElementById("statVermelho").textContent = vermelho;
 
   document.getElementById("meta").textContent =
-    rows.length + " informes carregados";
-
+    `${rows.length} informes carregados · ${visiblePoints} pontos no mapa`;
 }
 
-document
-.getElementById("city")
-.addEventListener("change",e => {
-
+document.getElementById("city").addEventListener("change", e => {
   city = e.target.value;
-
-  map.setView(CENTERS[city],12);
-
+  map.setView(CENTERS[city], 12);
   loadData();
-
 });
 
-document
-.querySelectorAll("button[data-filter]")
-.forEach(btn => {
-
+document.querySelectorAll("button[data-filter]").forEach(btn => {
   btn.onclick = () => {
-
     filter = btn.dataset.filter;
 
     document
@@ -798,68 +792,48 @@ document
     btn.classList.add("active");
 
     render();
-
   };
-
 });
 
-document
-.getElementById("gpsBtn")
-.onclick = () => {
-
+document.getElementById("gpsBtn").onclick = () => {
   navigator.geolocation.watchPosition(
-
     pos => {
-
       const lat = pos.coords.latitude;
       const lng = pos.coords.longitude;
 
-      userPosition = [lat,lng];
+      userPosition = [lat, lng];
 
       const icon = L.divIcon({
-        className:"",
-        html:'<div class="user-marker"></div>',
-        iconSize:[18,18],
-        iconAnchor:[9,9]
+        className: "",
+        html: '<div class="user-marker"></div>',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
       });
 
-      L.marker([lat,lng],{
-        icon
-      }).addTo(map);
+      L.marker([lat, lng], { icon }).addTo(map);
 
-      map.setView([lat,lng],14);
-
+      map.setView([lat, lng], 14);
     },
-
     () => alert("GPS não disponível"),
-
     {
-      enableHighAccuracy:true
+      enableHighAccuracy: true
     }
-
   );
-
 };
 
-document
-.getElementById("refreshBtn")
-.onclick = async () => {
-
-  const btn =
-    document.getElementById("refreshBtn");
+document.getElementById("refreshBtn").onclick = async () => {
+  const btn = document.getElementById("refreshBtn");
 
   btn.innerHTML = "⟳ Atualizando...";
   btn.disabled = true;
 
   await loadData();
 
-  btn.innerHTML = "↻ Refresh";
+  btn.innerHTML = "↻ Refrescar";
   btn.disabled = false;
-
 };
 
 loadData();
-
 </script>
 
 </body>
